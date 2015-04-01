@@ -193,23 +193,29 @@ void main() {
 
     vec3 col = vec3(0.0);
 
-    if (R.z < 2.0 && R.z > 0.0)
+    if (R.z < 2.0 && R.z > 0.0) {
         col = texture2D(color_EAST,R.xy).rgb;
+    }
 
-    if (R.z < 1.0 )
+    else if (R.z < 1.0 ) {
         col = texture2D(color_WEST,R.xy).rgb;
+    }
 
-    if (R.z < 3.0 && R.z > 1.0)
+    else if (R.z < 3.0 && R.z > 1.0) {
         col = texture2D(color_ZENITH,R.xy).rgb;
+    }
 
-    if (R.z < 5.0 && R.z > 3.0)
+    else if (R.z < 5.0 && R.z > 3.0) {
         col = texture2D(color_NADIR,R.xy).rgb;
+    }
 
-    if (R.z < 4.0 && R.z > 2.0)
+    else if (R.z < 4.0 && R.z > 2.0) {
         col = texture2D(color_SOUTH,R.xy).rgb;
+    }
 
-    if (R.z < 6.0 && R.z > 4.0)
+    else if (R.z < 6.0 && R.z > 4.0) {
         col = texture2D(color_NORTH,R.xy).rgb;
+    }
 
     gl_FragColor.rgb = col;
     gl_FragColor.a = 1.0;
