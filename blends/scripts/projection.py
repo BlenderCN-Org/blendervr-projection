@@ -1,14 +1,11 @@
 
 from bge import logic
-from bge import texture as VT 
+from bge import texture as VT
 
-def init_scene():
-    if not hasattr(logic, "scenes"):
-        logic.scenes = {}
 
-    scene = logic.getCurrentScene()
-    logic.scenes[scene.name] = scene
-
+# ############################################################
+# Video Texture
+# ############################################################
 
 class Wall:
     def __init__(self, scene_main, scene_projection, name):
@@ -68,6 +65,10 @@ class ProjectionsVR():
             view.refresh()
 
 
+# ############################################################
+# GLSL
+# ############################################################
+
 class ShaderObject():
     def __init__(self, reference, shader_object):
         self._reference = reference
@@ -114,26 +115,96 @@ class ShaderObject():
         self._shader()
 
 
-def create():
+# ############################################################
+# Check-Ups
+# ############################################################
+
+def check_objects(scenes):
+    """
+    check if we have all the scenes and all the objects properly created
+    """
+    scene_vr = scenes.get('Scene.VR')
+    scene_projection = scenes.get('Scene.Projection')
+
+    if not scene_vr:
+        print("Scene 'Scene.VR' not found. Make sure the scene is calling this init() function")
+        return False
+
+    if not scene_projection:
+        print("Scene 'Scene.Projection' not found. Make sure the scene is calling this init() function")
+        return False
+
+    objects = scene_vr.objects
+    for ob in {
+        'Camera.Parent',
+        'HEADTRACK.VR.ORIGIN',
+        'HEADTRACK.VR.HEAD',
+        'Camera.EAST',
+        'Camera.WEST',
+        'Camera.NORTH',
+        'Camera.SOUTH',
+        'Camera.ZENITH',
+        'Camera.NADIR',
+      }:
+        if not objects.get(ob):
+            print("Scene 'Scene.VR' doesn't have object '{0}'".format(ob))
+            return False
+
+    objects = scene_projection.objects
+    for ob in {
+        'HEADTRACK.PROJECTION.ORIGIN',
+        'HEADTRACK.PROJECTION.HEAD',
+        'Dummy',
+        'Dummy.EAST',
+        'Dummy.WEST',
+        'Dummy.NORTH',
+        'Dummy.SOUTH',
+        'Dummy.ZENITH',
+        'Dummy.NADIR',
+      }:
+        if not objects.get(ob):
+            print("Scene 'Scene.Projection' doesn't have object '{0}'".format(ob))
+            return False
+
+    return True
+
+
+# ############################################################
+# Main
+# ############################################################
+
+def main():
     """
     Create dynamic textures
     """
+    scenes = logic.scenes if hasattr(logic, 'scenes') else {}
 
-    if hasattr(logic, "walls"):
-        remove()
+    if not check_objects(scenes):
+        logic.endGame()
+        return
 
-    scenes = logic.scenes
+    scene_vr = scenes.get('Scene.VR')
+    scene_projection = scenes.get('Scene.Projection')
 
-    scene_main = scenes['Scene']
-    scene_projection = scenes['Scene.projection']
+    dummy_objects = {ob.name : ob for ob in scene_projection.objects if ob.name.startswith("Dummy.") }
+    logic.projection = ProjectionsVR(scene_vr, dummy_objects)
 
-    dummy_objects = {obj.name : obj for obj in scene_projection.objects if obj.name.startswith("Dummy.") }
-    logic.projection = ProjectionsVR(scene_main, dummy_objects)
-
+    objects = scene_projection.objects
     logic.shader_object = ShaderObject(
-            scene_projection.objects.get('CAMERA_REFERENCE'),
-            scene_projection.objects.get('Dummy'),
+            objects.get('HEADTRACK.PROJECTION.HEAD'),
+            objects.get('Dummy'),
             )
+
+
+def init_scene():
+    """
+    called by each individual scene
+    """
+    if not hasattr(logic, "scenes"):
+        logic.scenes = {}
+
+    scene = logic.getCurrentScene()
+    logic.scenes[scene.name] = scene
 
 
 def loop():
@@ -147,11 +218,3 @@ def loop():
 
     if hasattr(logic, "shader_object"):
         logic.shader_object.update()
-
-
-def remove():
-    """
-    reset the planes to their original textures
-    """
-    if hasattr(logic, "projection"):
-        del logic.projection
