@@ -11,16 +11,16 @@ This is the main scene where your VR environment is. We need to add a specific c
 Logic Bricks
 ------------
 
-* Always > Python Module Controller (scripts.projection.init)
+* Always > Python Module Controller (scripts.projection.init_scene)
 
 Objects Hierarchy
 -----------------
 ```
  Camera.Parent
    |
-    ---> HEADTRACK.ORIGIN.VR
+    ---> HEADTRACK.VR.ORIGIN
    |
-    ---> Camera.Rig
+    ---> HEADTRACK.VR.HEAD
      |
       ---> Camera.EAST
      |
@@ -42,12 +42,12 @@ Objects Description
 
 * **Camera.Parent** = Empty at 0,0,0
 
-* **HEADTRACK.ORIGIN.VR** = Empty representing the origin of the tracking system in the VR world. Its position is such that when the viewer is standing up, the position info we get should be the same as the Camera.Rig position in relation to the HEADTRACK.ORIGIN.VR
+* **HEADTRACK.VR.ORIGIN** = Empty representing the origin of the tracking system in the VR world. Its position is such that when the viewer is standing up, the position info we get should be the same as the Camera.Rig position in relation to the HEADTRACK.VR.ORIGIN
 
-  As an example: if the headtracking system has its origin at the floor, the HEADTRACK.ORIGIN.VR should be at the floor, while the Camera.Rig should be at the same place.
-  However if the headtracking system has its origin at a height 0.50, HEADTRACK.ORIGIN.VR should be at 0.50.
+  As an example: if the headtracking system has its origin at the floor, the HEADTRACK.VR.ORIGIN should be at the floor, while the HEADTRACK.VR.HEAD should be at the same place.
+  However if the headtracking system has its origin at a height 0.50, HEADTRACK.VR.ORIGIN should be at 0.50.
 
-* **Camera.Rig** = Empty at the center of the viewer point. Its position will be set dynamically by the headtracking system. Its position is determined by HEADTRACK.ORIGIN.VR position plus the headtracking position.
+* **HEADTRACK.VR.HEAD** = Empty at the center of the viewer point. Its position will be set dynamically by the headtracking system. Its position is determined by HEADTRACK.VR.ORIGIN position plus the headtracking position.
 
 * **Camera.EAST/WEST/...** = Camera with 90 (degrees, not lens) field of view facing around like a cube map, at the same position as Camera.Rig
 
@@ -68,12 +68,34 @@ Objects Description
 
 * **Camera.Projector** = Active camera, position and parameters matching the projector
 
-* **HEADTRACK.ORIGIN.PROJECTION** = Empty representing the origin of the tracking system in the real world.
+* **HEADTRACK.PROJECTION.ORIGIN** = Empty representing the origin of the tracking system in the real world.
 
-  As an example: if the headtracking system has its origin at the floor, the HEADTRACK.ORIGIN.VR should be at the floor.
+  As an example: if the headtracking system has its origin at the floor, the HEADTRACK.VR.ORIGIN should be at the floor.
+
+* **HEADTRACK.PROJECTION.HEAD** = Empty representing the head of the tracking system in the real world. Its position is dynamically set by the headtracking system. Its position is determined by HEADTRACK.PROJECTION.ORIGIN position plus the headtracking position.
 
 * **Dummy** = Dummy object with the GLSL material that is always used by the projection planes
 
 * **Dummy.EAST/WEST/...** = Dummy objects with the individual textures we render the Scene.VR cameras to
 
 * **Plane...** = Planes with the GLSL material representing the projection room
+
+Movements
+=========
+
+Navigate the VR Scene
+---------------------
+
+1. Scene.VR
+  * Move **Camera.Parent**.
+
+Head-Tracking movement
+----------------------
+
+1. Scene.VR:
+  * Move **HEADTRACK.VR.HEAD**
+  * (position = headtracking.position + HEADTRACK.VR.ORIGIN)
+
+2. Scene.Projection:
+  * Move **HEADTRACK.PROJECTION.HEAD**
+  * (position = headtracking.position + HEADTRACK.PROJECTION.ORIGIN)
