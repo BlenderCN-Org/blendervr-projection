@@ -59,8 +59,8 @@ Logic Bricks
 ------------
 
 * Always > Scene Actuator (Add Background Scene: Scene.VR)
-* Always > Python Module Controller (scripts.projection.init)
-* Delay (2 tics) > Python Module Controller (scripts.projection.create)
+* Always > Python Module Controller (scripts.projection.init_scene)
+* Delay (2 tics) > Python Module Controller (scripts.projection.main)
 * Always (Pulse True) > Python Module Controller (scripts.projection.loop)
 
 Objects Description
