@@ -7,6 +7,7 @@ Scene.VR
 ========
 
 This is the main scene where your VR environment is. We need to add a specific camera rig to the scene in order to the scripts to work.
+This scene width and height parameters need to be square (ideally a power of 2 like 1024x1024) so that the cubemap capturing is correct.
 
 Logic Bricks
 ------------
@@ -31,8 +32,6 @@ Objects Hierarchy
       ---> Camera.SOUTH
      |
       ---> Camera.ZENITH
-     |
-      ---> Camera.NADIR
      |
       ---> Camera.NADIR
 ```
