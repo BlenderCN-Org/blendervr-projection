@@ -104,7 +104,7 @@ if blendervr.is_virtual_environment():
 
             if x or y or z:
                 try:
-                    self._matrix = Matrix.Translation((-x, y, -z)) * self._matrix
+                    self._matrix = Matrix.Translation((-x, z, -y)) * self._matrix
                     info = {}
                     info['matrix'] = self._matrix
                     self.user_position(info)
@@ -126,7 +126,7 @@ if blendervr.is_virtual_environment():
                 x, y, z = info['matrix'].translation
 
                 # leaving here for debugging, I need to refresh myself on what is the swizzle needed in BlenderVR
-                self.logger.info('x', x, 'y', y, 'z', z)
+                self.logger.info('x: {0:.2f}, y: {1:.2f}, z: {2:.2f}'.format(-x, z, -y))
 
                 position = Matrix.Translation((-x, z, -y)).translation
 
