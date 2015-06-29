@@ -1,5 +1,7 @@
 import blendervr
 
+VRPN_DEBUG = True
+
 if blendervr.is_virtual_environment():
     import bge
     from mathutils import Vector, Matrix
@@ -18,8 +20,6 @@ if blendervr.is_virtual_environment():
 
             self._all_loaded = False
             self._matrix = Matrix.Identity(4)
-
-            self._hacked = False
 
         def _checkScenes(self):
             """
@@ -55,6 +55,7 @@ if blendervr.is_virtual_environment():
                self._headtrack_projection_head \
                :
                    self._all_loaded = True
+                   self._vrpn_proxy_init()
                    return True
             else:
                 return False
@@ -193,12 +194,28 @@ if blendervr.is_virtual_environment():
                 except Exception as E:
                     self.logger.log_traceback(E)
 
+        def _vrpn_proxy_init(self):
+            """
+            initialize fake vrpn inputs based on initial proxy positions
+            """
+            if not VRPN_DEBUG:
+                return
+
+            position = self._headtrack_projection_head.worldPosition - self._headtrack_projection_origin.worldPosition
+            x,y,z = position.xyz
+
+            self._matrix = Matrix.Translation((-x, z, -y))
+            self._headtrack_vr_head.worldPosition = position + self._headtrack_vr_origin.worldPosition
+
+
         def _keyboard_vrpn_proxy(self):
 
             """
             Keyboard controls the player (hacking VRPN messages)
             with XCV (x,y,z) and Shift+XCV (-x,-y,-z)
             """
+            if not VRPN_DEBUG:
+                return
 
             _events = logic.keyboard.events
 
