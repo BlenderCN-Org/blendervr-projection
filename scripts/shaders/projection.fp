@@ -9,19 +9,23 @@ uniform sampler2D color_NADIR;
 
 varying vec4 coord_vec;
 
-/* function from Martinsh Upitis */
+#define M_PI 3.1415926535897932384626433832795
+#define M_PI_SQ 1.7724538509055159
+
+/* continous cube mapping by Cindy M. Grimm Bill Niebruegge */
+
 vec3 cubeRot(vec3 R)
 {
     float x, y, z, texIndex;
     float L = sqrt(2.0) / 2.0;
 
     // create the normals to check against
-    vec3 N1 = vec3(L, L, 0.0);
-    vec3 N2 = vec3(-L, L, 0.0);
-    vec3 N3 = vec3(0.0, L, L);
-    vec3 N4 = vec3(0.0, L, -L);
-    vec3 N5 = vec3(L, 0.0, L);
-    vec3 N6 = vec3(-L, 0.0, L);
+    vec3 N1 = vec3(  L, L,   0.0);
+    vec3 N2 = vec3( -L, L,   0.0);
+    vec3 N3 = vec3(0.0, L,   L);
+    vec3 N4 = vec3(0.0, L,  -L);
+    vec3 N5 = vec3(  L, 0.0, L);
+    vec3 N6 = vec3( -L, 0.0, L);
 
     R = normalize(R);
 
@@ -36,54 +40,54 @@ vec3 cubeRot(vec3 R)
     if (check1 && check2 && check3 && check4)
     {
         // do nothing
-        x = -1.0*R.x;
-        y = 1.0*R.y;
-        z = -1.0*R.z;
+        x = R.x;
+        y = R.y;
+        z = R.z;
         texIndex = 0.0;
     }
     // negative y
     else if (!check1 && !check2 && !check3 && !check4)
     {
         // rotate around x, 180 degrees
-        x = 1.0*R.x;
-        y = 1.0*R.y;
-        z = -1.0*R.z;
+        x =  R.x;
+        y = -R.y;
+        z = -R.z;
         texIndex = 1.0;
     }
     // positive z
     else if (check5 && check6 && check3 && !check4)
     {
         // rotate around x, 90 degrees
-        x = -1.0*R.x;
-        y = 1.0*R.z;
-        z = 1.0*R.y;
+        x =  R.x;
+        y =  R.z;
+        z = -R.y;
         texIndex = 2.0;
     }
     // negative z
     else if (!check5 && !check6 && !check3 && check4)
     {
         // rotate around x, -90 degrees
-        x = R.x;
-        y = -1.0*R.z;
-        z = R.y;
-        texIndex = 4.0;
+        x =  R.x;
+        y = -R.z;
+        z =  R.y;
+        texIndex = 3.0;
     }
     // negative x
     else if (!check5 && check6 && !check1 && check2)
     {
         // rotate around z, -90 degrees
-        x = -1.0*R.z;
-        y = -1.0*R.x;
-        z = 1.0*R.y;
-        texIndex = 3.0;
+        x =  R.y;
+        y = -R.x;
+        z =  R.z;
+        texIndex = 4.0;
     }
     // positive x
     else if (check5 && !check6 && check1 && !check2)
     {
         // rotate around z, 90 degrees
-        x = 1.0*R.z;
-        y = R.x;
-        z = 1.0*R.y;
+        x = -R.y;
+        y =  R.x;
+        z =  R.z;
         texIndex = 5.0;
     }
     else
@@ -95,10 +99,11 @@ vec3 cubeRot(vec3 R)
         texIndex = 6.0;
     }
 
-    float S1 = atan((x / y),sqrt(3.4));
-    float T1 = atan((z / y),sqrt(3.4));
-    float S = 0.5 - S1;
-    float T = 0.5 - T1;
+    float S1 = atan((x/y), sqrt(2.0));
+    float S2 = 2.0 * asin(1.0 / sqrt(3.0));
+    float S = 0.5 + (S1 / S2);
+    float T = ( 1.0 + (asin(z) /
+    ( asin(1.0 / (sqrt (2.0 + (x / y)*(x / y) ) ) ) ) ) ) / 2.0;
 
     return vec3(S, T, texIndex);
 }
@@ -110,30 +115,39 @@ void main() {
     dir = normalize(dir);
     vec3 R = cubeRot(dir);
 
+    vec2 uv = R.st;
+    float texIndex = R.z;
+
     vec3 col = vec3(0.0);
 
-    if (R.z < 2.0 && R.z > 0.0) {
-        col = texture2D(color_EAST,R.xy).rgb;
+    // positive y
+    if (texIndex == 0.0) {
+        col = texture2D(color_WEST, uv).rgb;
     }
 
-    else if (R.z < 1.0 ) {
-        col = texture2D(color_WEST,R.xy).rgb;
+    // negative y
+    else if (texIndex == 1.0) {
+        col = texture2D(color_EAST, uv).rgb;
     }
 
-    else if (R.z < 3.0 && R.z > 1.0) {
-        col = texture2D(color_ZENITH,R.xy).rgb;
+    // positive z
+    else if (texIndex == 2.0) {
+        col = texture2D(color_ZENITH, uv).rgb;
     }
 
-    else if (R.z < 5.0 && R.z > 3.0) {
-        col = texture2D(color_NADIR,R.xy).rgb;
+    // negative z
+    else if (texIndex == 3.0) {
+        col = texture2D(color_NADIR, uv).rgb;
     }
 
-    else if (R.z < 4.0 && R.z > 2.0) {
-        col = texture2D(color_SOUTH,R.xy).rgb;
+    // negative x
+    else if (texIndex == 4.0) {
+        col = texture2D(color_SOUTH, uv).rgb;
     }
 
-    else if (R.z < 6.0 && R.z > 4.0) {
-        col = texture2D(color_NORTH,R.xy).rgb;
+    // positive x
+    else if (texIndex == 5.0) {
+        col = texture2D(color_NORTH, uv).rgb;
     }
 
     gl_FragColor.rgb = col;
