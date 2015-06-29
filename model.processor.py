@@ -65,6 +65,7 @@ if blendervr.is_virtual_environment():
             """
 
             self._keyboard_calibration()
+            self._keyboard_vrpn_proxy()
 
             if not self._checkScenes():
                 return
@@ -185,6 +186,43 @@ if blendervr.is_virtual_environment():
             if x or y or z:
                 try:
                     self._matrix = Matrix.Translation((-x, z, -y)) * self._matrix
+                    info = {}
+                    info['matrix'] = self._matrix
+                    self.user_position(info)
+
+                except Exception as E:
+                    self.logger.log_traceback(E)
+
+        def _keyboard_vrpn_proxy(self):
+
+            """
+            Keyboard controls the player (hacking VRPN messages)
+            with XCV (x,y,z) and Shift+XCV (-x,-y,-z)
+            """
+
+            _events = logic.keyboard.events
+
+            x = y = z = 0
+            SPEED = 0.01
+
+            if _events[events.XKEY]:
+                x += SPEED
+
+            if _events[events.CKEY]:
+                y += SPEED
+
+            if _events[events.VKEY]:
+                z += SPEED
+
+
+            if x or y or z:
+                try:
+                    if _events[events.LEFTSHIFTKEY]: # camera rotation
+                        x = -x
+                        y = -y
+                        z = -z
+
+                    self._matrix = Matrix.Translation((z, x, y)) * self._matrix
                     info = {}
                     info['matrix'] = self._matrix
                     self.user_position(info)
