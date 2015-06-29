@@ -1,4 +1,4 @@
-uniform vec3 camera_position;
+uniform vec3 head_position;
 
 uniform sampler2D color_NORTH;
 uniform sampler2D color_SOUTH;
@@ -105,7 +105,7 @@ vec3 cubeRot(vec3 R)
 
 void main() {
     vec3 world_position = coord_vec.xyz;
-    vec3 dir = world_position - camera_position;
+    vec3 dir = world_position - head_position;
 
     dir = normalize(dir);
     vec3 R = cubeRot(dir);

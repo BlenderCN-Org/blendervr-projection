@@ -100,7 +100,7 @@ class ShaderObject():
                 if not shader.isValid():
                     shader.setSource(self._vertex_shader, self._fragment_shader, True)
 
-                shader.setUniformfv('camera_position', self._reference_position)
+                shader.setUniformfv('head_position', self._reference_position)
 
                 shader.setSampler('color_NORTH', 0)
                 shader.setSampler('color_SOUTH', 1)
