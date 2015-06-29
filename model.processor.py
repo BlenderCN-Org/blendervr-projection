@@ -264,7 +264,7 @@ if blendervr.is_virtual_environment():
                 # to remove: mockup as VRPN sever kept sending me (0,0,0) packets in between real (x,y,z) (DPQ)
 
                     # leaving here for debugging, I need to refresh myself on what is the swizzle needed in BlenderVR
-                    self.logger.info('Raw Data >> x: {0:.2f}, y: {1:.2f}, z: {2:.2f}'.format(x, y, z))
+                    #self.logger.info('Raw Data >> x: {0:.2f}, y: {1:.2f}, z: {2:.2f}'.format(x, y, z))
 
                     position = Matrix.Translation((z, x, y)).translation
 
