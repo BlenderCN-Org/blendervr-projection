@@ -222,7 +222,7 @@ if blendervr.is_virtual_environment():
                         y = -y
                         z = -z
 
-                    self._matrix = Matrix.Translation((z, x, y)) * self._matrix
+                    self._matrix = Matrix.Translation((-x, z, -y)) * self._matrix
                     info = {}
                     info['matrix'] = self._matrix
                     self.user_position(info)
