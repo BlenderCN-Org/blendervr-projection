@@ -167,26 +167,26 @@ if blendervr.is_virtual_environment():
             SPEED = 0.005
 
             if _events[events.WKEY]:
-                y -= SPEED
-
-            elif _events[events.SKEY]:
-                y += SPEED
-
-            if _events[events.AKEY]:
                 x += SPEED
 
-            elif _events[events.DKEY]:
+            elif _events[events.SKEY]:
                 x -= SPEED
 
+            if _events[events.AKEY]:
+                y += SPEED
+
+            elif _events[events.DKEY]:
+                y -= SPEED
+
             if _events[events.QKEY]:
-                z += SPEED
+                z -= SPEED
 
             elif _events[events.EKEY]:
-                z -= SPEED
+                z += SPEED
 
             if x or y or z:
                 try:
-                    self._matrix = Matrix.Translation((-x, z, -y)) * self._matrix
+                    self._matrix = Matrix.Translation((y, z, x)) * self._matrix
                     info = {}
                     info['matrix'] = self._matrix
                     self.user_position(info)
