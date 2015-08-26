@@ -98,3 +98,45 @@ Head-Tracking movement
 2. Scene.Projection:
   * Move **HEADTRACK.PROJECTION.HEAD**
   * (position = headtracking.position + HEADTRACK.PROJECTION.ORIGIN)
+
+Setup Projector
+===============
+
+1. If projector has a non null shift (see 'projector shift' in google), blendervr-projection requires
+a Blender version that takes into acount Camera shift in BGE. Take the Blender version in BlenderVR trunk for now
+(not yet integrated in Blender2.75a, should be integrated in next Blender release).
+
+2. Open model-calibration.blend
+
+3. (modify the representation of the VR architecture to match yours)
+
+4. Go to the screen layout called 'Calibration' (full screen of Projection scene, camera viewpoint,
+the .blend should open itself on that very layout)
+
+5. With the projector connected to your computer (duplicate screen, projector resolution),
+change camera extrinsic and intrinsic parameters to match projector's. You can also do it in real time (BGE), see next step.
+Parameters are:
+
+* Intrinsic: Camera Shift, Zoom
+
+* Extrinsic: Camera Position / Orientation (eventually use your tracking system to know the exact pos/rot of the projector compared to the real screens)
+
+5bis. BGE controls (no need for BlenderVR here, controls defined in .blend file)
+
+* LeftCtrl + [Left,Right,Up,Down] (arrow keys) rotate Camera (in Projection Scene)
+
+* LeftCtrl + [WSADQE] translate Camera (in Projection Scene)
+
+6. Once Real and Virtual match achieved, save the .blend file and open BlenderVR
+
+7. Select a 'bufferless' screen configuration (i.e. one with a buffer set to "none": <graphic_buffer user='user A' buffer="none" eye="middle"/>)
+
+8. Launch BlenderVR, controls are:
+
+* [W,S,A,D,Q,E]: translate BlenderVR user (bypass user_position method, for those without user VRPN tracking enabled)
+
+* [Left,Right] (arrow keys) rotate Camera (in VR Scene)
+
+* [Up,Down] (arrow keys) translate Camera (in VR Scene)
+
+9. Reproduce / append architecture geometry and camera setup in your own scene (e.g. model.blend)
