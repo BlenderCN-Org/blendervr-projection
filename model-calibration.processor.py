@@ -1,5 +1,7 @@
 import blendervr
 
+VRPN_DEBUG = True
+
 if blendervr.is_virtual_environment():
     import bge
     from mathutils import Vector, Matrix
@@ -18,7 +20,6 @@ if blendervr.is_virtual_environment():
 
             self._all_loaded = False
             self._matrix = Matrix.Identity(4)
-
 
         def _checkScenes(self):
             """
@@ -54,6 +55,7 @@ if blendervr.is_virtual_environment():
                self._headtrack_projection_head \
                :
                    self._all_loaded = True
+                   self._vrpn_proxy_init()
                    return True
             else:
                 return False
@@ -62,10 +64,14 @@ if blendervr.is_virtual_environment():
             """
             run every frame
             """
+
+            self._keyboard_vrpn_proxy()
+
             if not self._checkScenes():
                 return
 
             self._keyboard()
+
 
         def _keyboard(self):
             """handle keyboard events"""
@@ -112,6 +118,59 @@ if blendervr.is_virtual_environment():
                 except Exception as E:
                     self.logger.log_traceback(E)
 
+        def _vrpn_proxy_init(self):
+            """
+            initialize fake vrpn inputs based on initial proxy positions
+            """
+            if not VRPN_DEBUG:
+                return
+
+            position = self._headtrack_projection_head.worldPosition - self._headtrack_projection_origin.worldPosition
+            x,y,z = position.xyz
+
+            self._matrix = Matrix.Translation((-x, z, -y))
+            self._headtrack_vr_head.worldPosition = position + self._headtrack_vr_origin.worldPosition
+
+
+        def _keyboard_vrpn_proxy(self):
+
+            """
+            Keyboard controls the player (hacking VRPN messages)
+            with XCV (x,y,z) and Shift+XCV (-x,-y,-z)
+            """
+            if not VRPN_DEBUG:
+                return
+
+            _events = logic.keyboard.events
+
+            x = y = z = 0
+            SPEED = 0.01
+
+            if _events[events.XKEY]:
+                x += SPEED
+
+            if _events[events.CKEY]:
+                y += SPEED
+
+            if _events[events.VKEY]:
+                z += SPEED
+
+
+            if x or y or z:
+                try:
+                    if _events[events.LEFTSHIFTKEY]: # camera rotation
+                        x = -x
+                        y = -y
+                        z = -z
+
+                    self._matrix = Matrix.Translation((-x, z, -y)) * self._matrix
+                    info = {}
+                    info['matrix'] = self._matrix
+                    self.user_position(info)
+
+                except Exception as E:
+                    self.logger.log_traceback(E)
+
         def user_position(self, info):
             """
             Callback defined in the XML config file to one of the VRPN Tracker devices
@@ -124,10 +183,18 @@ if blendervr.is_virtual_environment():
                 # do not call: super(Processor, self).user_position(info)
 
                 x, y, z = info['matrix'].translation
-                position = Matrix.Translation((-z, -x, y)).translation
 
-                self._headtrack_vr_head.worldPosition = position + self._headtrack_vr_origin.worldPosition
-                self._headtrack_projection_head.worldPosition = position + self._headtrack_projection_origin.worldPosition
+                if abs(x)>=0.01 or abs(y)>=0.01 or abs(z)>=0.01:
+                # to remove: mockup as VRPN sever kept sending me (0,0,0) packets in between real (x,y,z) (DPQ)
+
+                    # leaving here for debugging, I need to refresh myself on what is the swizzle needed in BlenderVR
+                    #self.logger.info('Raw Data >> x: {0:.2f}, y: {1:.2f}, z: {2:.2f}'.format(x, y, z))
+
+                    position = Matrix.Translation((-z, -x, y)).translation
+                    # self.logger.debug(position)
+                    self._headtrack_vr_head.worldPosition = position + self._headtrack_vr_origin.worldPosition
+                    self.logger.info(self._headtrack_vr_head.worldPosition)
+                    self._headtrack_projection_head.worldPosition = position + self._headtrack_projection_origin.worldPosition
 
             except Exception as E:
                 self.logger.log_traceback(E)
@@ -148,4 +215,3 @@ elif blendervr.is_console():
 
         def useLoader(self):
             return True
-
