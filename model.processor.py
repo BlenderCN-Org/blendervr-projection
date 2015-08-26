@@ -124,7 +124,7 @@ if blendervr.is_virtual_environment():
                 # do not call: super(Processor, self).user_position(info)
 
                 x, y, z = info['matrix'].translation
-                position = Matrix.Translation((z, x, y)).translation
+                position = Matrix.Translation((-z, -x, y)).translation
 
                 self._headtrack_vr_head.worldPosition = position + self._headtrack_vr_origin.worldPosition
                 self._headtrack_projection_head.worldPosition = position + self._headtrack_projection_origin.worldPosition
